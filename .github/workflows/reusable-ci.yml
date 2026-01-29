@@ -1,0 +1,46 @@
+name: Reusable CI
+
+on:
+  workflow_call:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          flake8.
+
+      - name: Run test
+        run: |
+          pip install pytest
+          pytest
+
+      - name: SAST scan with Bandit
+        run: |
+          pip install bandit
+          bandit -r .
+
+      - name: Build Docker image
+        run: |
+          docker build -t demo-api.
+
+      - name: Scan Docker image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: demo-api
