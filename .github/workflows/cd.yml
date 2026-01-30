@@ -1,0 +1,67 @@
+name: CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+
+  # Ejecutar CI reusable primero
+  call-ci:
+    uses: ./.github/workflows/reusable-ci.yml
+
+  # Deploy a STAGING
+  deploy-staging:
+    needs: call-ci
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying to STAGING..."
+          echo "Simulando deploy a cloud staging server"
+          sleep 10
+          echo "Staging deploy completado"
+  
+  # Tst de integración
+  integration-test:
+      needs: deploy-staging
+      runs-on: ubuntu-latest
+
+      steps:
+        - name: Run integration tests
+          run: |
+            echo "Corriendo integracion test..."
+            sleep 5
+            echo "Integracion test ok"
+
+  # DAST Scan (simulado)
+  dast-scan:
+    needs: integration-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: DAST Scan
+        run: |
+          echo "Running DAST scan..."
+          sleep 5
+          echo "No hay bulnerabilidad encontrada"
+  
+  # Deploy a PRODUCCION (con approval)
+  deploy-production:
+    needs: dast-scan
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Deploy to Production
+        run: |
+          echo "Deployar a producción..."
+          sleep 10
+          echo "Deploy a produccion completado"
