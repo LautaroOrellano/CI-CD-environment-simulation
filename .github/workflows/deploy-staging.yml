@@ -2,18 +2,13 @@ name: Deploy Staging
 
 on:
   workflow_call:
-    inputs:
+    secrets:
       gcp_project_id:
         required: true
-        type: string
       staging_vm_ip:
         required: true
-        type: string
       staging_vm_user:
         required: true
-        type: string
-
-    secrets:
       staging_vm_key:
         required: true
       GCR_CREDENTIALS_JSON:
@@ -33,23 +28,23 @@ jobs:
         with:
           credentials_json: ${{ secrets.GCR_CREDENTIALS_JSON }}
 
-      # Permitir docker push a gcr.io
+      # Configurar docker para GCR
       - name: Configure Docker for GCR
         run: gcloud auth configure-docker --quiet
 
       - name: Build and push Docker image
         run: |
-          docker build -t gcr.io/${{ inputs.gcp_project_id }}/demo-api:staging .
-          docker push gcr.io/${{ inputs.gcp_project_id }}/demo-api:staging
+          docker build -t gcr.io/${{ secrets.gcp_project_id }}/demo-api:staging .
+          docker push gcr.io/${{ secrets.gcp_project_id }}/demo-api:staging
 
       - name: Deploy to Staging VM via SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
-          host: ${{ inputs.staging_vm_ip }}
-          username: ${{ inputs.staging_vm_user }}
+          host: ${{ secrets.staging_vm_ip }}
+          username: ${{ secrets.staging_vm_user }}
           key: ${{ secrets.staging_vm_key }}
           script: |
-            docker pull gcr.io/${{ inputs.gcp_project_id }}/demo-api:staging
+            docker pull gcr.io/${{ secrets.gcp_project_id }}/demo-api:staging
             docker stop demo-api || true
             docker rm demo-api || true
-            docker run -d -p 80:80 --name demo-api gcr.io/${{ inputs.gcp_project_id }}/demo-api:staging
+            docker run -d -p 80:80 --name demo-api gcr.io/${{ secrets.gcp_project_id }}/demo-api:staging

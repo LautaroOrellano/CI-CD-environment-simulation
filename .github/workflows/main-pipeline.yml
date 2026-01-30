@@ -15,12 +15,10 @@ jobs:
     needs: call-ci
     uses: ./.github/workflows/deploy-staging.yml
 
-    with:
+    secrets:
       gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
       staging_vm_ip: ${{ secrets.STAGING_VM_IP }}
       staging_vm_user: ${{ secrets.STAGING_VM_USER }}
-
-    secrets:
       staging_vm_key: ${{ secrets.STAGING_VM_KEY }}
       GCR_CREDENTIALS_JSON: ${{ secrets.GCR_CREDENTIALS_JSON }}
 
@@ -28,5 +26,5 @@ jobs:
     needs: deploy-staging
     uses: ./.github/workflows/integration-test.yml
 
-    with:
+    secrets:
       gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
