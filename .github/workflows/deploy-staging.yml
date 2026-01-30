@@ -35,8 +35,8 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          docker build -t gcr.io/${{ secrets.gcp_project_id }}/demo-api:staging .
-          docker push gcr.io/${{ secrets.gcp_project_id }}/demo-api:staging
+          docker build -t us-central1-docker.pkg.dev/${{ secrets.gcp_project_id }}/demo-api:staging .
+          docker push us-central1-docker.pkg.dev/${{ secrets.gcp_project_id }}/demo-api:staging
 
       - name: Deploy to Staging VM via SSH
         uses: appleboy/ssh-action@v0.1.6
@@ -45,7 +45,7 @@ jobs:
           username: ${{ secrets.staging_vm_user }}
           key: ${{ secrets.staging_vm_key }}
           script: |
-            docker pull gcr.io/${{ secrets.gcp_project_id }}/demo-api:staging
+            docker pull us-central1-docker.pkg.dev/${{ secrets.gcp_project_id }}/demo-api:staging
             docker stop demo-api || true
             docker rm demo-api || true
-            docker run -d -p 80:80 --name demo-api gcr.io/${{ secrets.gcp_project_id }}/demo-api:staging
+            docker run -d -p 80:80 --name demo-api us-central1-docker.pkg.dev/${{ secrets.gcp_project_id }}/demo-api:staging

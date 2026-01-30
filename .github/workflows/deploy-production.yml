@@ -35,8 +35,8 @@ jobs:
 
       - name: Pull Docker image and tag
         run: |
-          docker pull gcr.io/${{ github.event.inputs.gcp_project_id }}/demo-api:staging
-          docker tag gcr.io/${{ github.event.inputs.gcp_project_id }}/demo-api:staging gcr.io/${{ github.event.inputs.gcp_project_id }}/demo-api:prod
+          docker pull us-central1-docker.pkg.dev/${{ github.event.inputs.gcp_project_id }}/demo-api:staging
+          docker tag us-central1-docker.pkg.dev/${{ github.event.inputs.gcp_project_id }}/demo-api:staging us-central1-docker.pkg.dev/${{ github.event.inputs.gcp_project_id }}/demo-api:prod
 
       - name: Deploy to Production VM via SSH
         uses: appleboy/ssh-action@v0.1.6
@@ -45,7 +45,7 @@ jobs:
           username: ${{ github.event.inputs.prod_vm_user }}
           key: ${{ github.event.inputs.prod_vm_key }}
           script: |
-            docker pull gcr.io/${{ github.event.inputs.gcp_project_id }}/demo-api:prod
+            docker pull us-central1-docker.pkg.dev/${{ github.event.inputs.gcp_project_id }}/demo-api:prod
             docker stop demo-api || true
             docker rm demo-api || true
-            docker run -d -p 80:80 --name demo-api gcr.io/${{ github.event.inputs.gcp_project_id }}/demo-api:prod
+            docker run -d -p 80:80 --name demo-api us-central1-docker.pkg.dev/${{ github.event.inputs.gcp_project_id }}/demo-api:prod
