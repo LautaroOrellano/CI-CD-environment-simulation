@@ -11,7 +11,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copiamos el código del script
-COPY scripts/ ./scripts/
+COPY app/ ./app
 
 # Exponemos el puerto local para correr la app
 EXPOSE 8000
