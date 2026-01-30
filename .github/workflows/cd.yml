@@ -1,67 +1,99 @@
-name: CD Pipeline
+#name: CD Pipeline
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+#on:
+#  push:
+#    branches:
+#      - main
+#  workflow_dispatch:
 
-jobs:
+#jobs:
 
   # Ejecutar CI reusable primero
-  call-ci:
-    uses: ./.github/workflows/reusable-ci.yml
+#  call-ci:
+#    uses: ./.github/workflows/reusable-ci.yml
 
   # Deploy a STAGING
-  deploy-staging:
-    needs: call-ci
-    runs-on: ubuntu-latest
-    environment: staging
-    
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Deploy to Staging
-        run: |
-          echo "Deploying to STAGING..."
-          echo "Simulando deploy a cloud staging server"
-          sleep 10
-          echo "Staging deploy completado"
+#  deploy-staging:
+#    needs: call-ci
+#    runs-on: ubuntu-latest
+#    environment: staging
   
-  # Tst de integración
-  integration-test:
-      needs: deploy-staging
-      runs-on: ubuntu-latest
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
 
-      steps:
-        - name: Run integration tests
-          run: |
-            echo "Corriendo integracion test..."
-            sleep 5
-            echo "Integracion test ok"
+#      - name: Authenticate GCR
+#        uses: google-github-actions/auth@v1
+#        with:
+#          credentials_json: ${{ secrets.GCR_CREDENTIALS_JSON }}
+
+#      - name: Build and push Docker image
+#        run: |
+#          docker build -t gcr.io/${{ secrets.GCP_PROJECT_ID }}/demo-api:staging .
+#          docker push gcr.io/${{ secrets.GCP_PROJECT_ID }}/demo-api:staging
+
+#      - name: Deploy to Staging VM via SSH
+#        uses: appleboy/ssh-action@v0.1.6
+#        with:
+#            host: ${{ secrets.STAGING_VM_IP }}
+#            username: ${{ secrets.STAGING_VM_USER }}
+#            key: ${{ secrets.STAGING_VM_KEY }}
+#            script: |
+#              docker pull gcr.io/${{ secrets.GCP_PROJECT_ID }}/demo-api:staging
+#              docker stop demo-api || true
+#              docker rm demo-api || true
+#              docker run -d -p 80:80 --name demo-api gcr.io/${{ secrets.GCP_PROJECT_ID }}/demo-api:staging
+
+  # Tst de integración
+#  integration-test:
+#      needs: deploy-staging
+#      runs-on: ubuntu-latest
+#      steps:
+#        - name: Run integration tests
+#          run: |
+#            echo "Corriendo integracion test..."
+#            sleep 5
+#            echo "Integracion test ok"
 
   # DAST Scan (simulado)
-  dast-scan:
-    needs: integration-test
-    runs-on: ubuntu-latest
+#  dast-scan:
+#    needs: integration-test
+#    runs-on: ubuntu-latest
+#    steps:
+#      - name: DAST Scan
+#        run: |
+#          echo "Running DAST scan..."
+#          sleep 5
+#          echo "No hay bulnerabilidad encontrada"
 
-    steps:
-      - name: DAST Scan
-        run: |
-          echo "Running DAST scan..."
-          sleep 5
-          echo "No hay bulnerabilidad encontrada"
-  
   # Deploy a PRODUCCION (con approval)
-  deploy-production:
-    needs: dast-scan
-    runs-on: ubuntu-latest
-    environment: production
+#  deploy-production:
+#    needs: dast-scan
+#    runs-on: ubuntu-latest
+#    environment: production
 
-    steps:
-      - name: Deploy to Production
-        run: |
-          echo "Deployar a producción..."
-          sleep 10
-          echo "Deploy a produccion completado"
+#    steps:
+#      - name: Checkout
+#        uses: actions/checkout@v4
+
+#      - name: Authenticate GCR
+#        uses: google-github-actions/auth@v1
+#        with:
+#          credentials_json: ${{ secrets.GCR_CREDENTIALS_JSON }}
+
+#      - name: Pull Docker image
+#        run: |
+#          docker pull gcr.io/${{ secrets.GCP_PROJECT_ID }}/demo-api:staging
+#          docker tag gcr.io/${{ secrets.GCP_PROJECT_ID }}/demo-api:staging gcr.io/${{ secrets.GCP_PROJECT_ID }}/demo-api:prod
+
+#      - name: Deploy to Production VM via SSH
+#        uses: appleboy/ssh-action@v0.1.6
+#        with:
+#          host: ${{ secrets.PROD.VM_IP }}
+#          username: ${{ secrets.PROD_VM_USER }}
+#          key: ${{ secrets.PROD_VM_KEY }}
+#          script:
+#            docker pull gcr.io/${{ secrets.GCP_PROJECT_ID }}/demo-api:prod
+#            docker stop demo-api || true
+#            docker rm demo-api || true
+#            docker run -d -p 80:80 --name demo-api gcr.io/${{ secrets.GCP_PROJECT_ID }}/demo-api:prod
