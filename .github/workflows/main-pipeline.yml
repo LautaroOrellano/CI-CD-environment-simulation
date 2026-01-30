@@ -26,5 +26,5 @@ jobs:
     needs: deploy-staging
     uses: ./.github/workflows/integration-test.yml
 
-    with:
+    secrets:
       gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
