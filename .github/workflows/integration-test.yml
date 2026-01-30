@@ -3,7 +3,7 @@ name: Integration & Dast
 on:
   workflow_call:
     inputs:
-      gpc_project_id:
+      gcp_project_id:
         required: true
         type: string
 
