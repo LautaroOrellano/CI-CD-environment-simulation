@@ -2,9 +2,6 @@ name: CI
 
 on:
   workflow_call:
-    secrets:
-      GCP_PROJECT_ID:
-        required: true
 
 jobs:
   build:

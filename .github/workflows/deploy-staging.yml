@@ -12,30 +12,30 @@ on:
       staging_vm_user:
         required: true
         type: string
+
+    secrets:
       staging_vm_key:
         required: true
-        type: string
-    secrets:
-      GCP_PROJECT_ID:
-        required: true
-      STAGING_VM_IP:
-        required: true
-      STAGING_VM_USER:
-        required: true
-      STAGING_VM_KEY:
+      GCR_CREDENTIALS_JSON:
         required: true
 
 jobs:
   deploy-staging:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Auth en GCP
       - name: Authenticate GCR
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCR_CREDENTIALS_JSON }}
+
+      # Permitir docker push a gcr.io
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker --quiet
 
       - name: Build and push Docker image
         run: |
@@ -47,7 +47,7 @@ jobs:
         with:
           host: ${{ inputs.staging_vm_ip }}
           username: ${{ inputs.staging_vm_user }}
-          key: ${{ inputs.staging_vm_key }}
+          key: ${{ secrets.staging_vm_key }}
           script: |
             docker pull gcr.io/${{ inputs.gcp_project_id }}/demo-api:staging
             docker stop demo-api || true
