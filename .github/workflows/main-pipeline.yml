@@ -10,6 +10,8 @@ jobs:
 
   call-ci:
     uses: ./.github/workflows/ci.yml
+    secrets:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
 
   deploy-staging:
     needs: call-ci
@@ -34,16 +36,16 @@ jobs:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
 
 
-  deploy-production:
-    if: false   
-    uses: ./.github/workflows/deploy-production.yml
-    with:
-      gcp_project_id: "dummy"
-      prod_vm_ip: "dummy"
-      prod_vm_user: "dummy"
-      prod_vm_key: "dummy"
-    secrets:
-      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-      PROD_VM_IP: ${{ secrets.PROD_VM_IP }}
-      PROD_VM_USER: ${{ secrets.PROD_VM_USER }}
-      PROD_VM_KEY: ${{ secrets.PROD_VM_KEY }}
+#  deploy-production:
+#   if : false   
+#    uses: ./.github/workflows/deploy-production.yml
+#    with:
+#      gcp_project_id: "dummy"
+#      prod_vm_ip: "dummy"
+#      prod_vm_user: "dummy"
+#      prod_vm_key: "dummy"
+#    secrets:
+#      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+#      PROD_VM_IP: ${{ secrets.PROD_VM_IP }}
+#      PROD_VM_USER: ${{ secrets.PROD_VM_USER }}
+#      PROD_VM_KEY: ${{ secrets.PROD_VM_KEY }}
