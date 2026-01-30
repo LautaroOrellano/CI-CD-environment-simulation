@@ -8,25 +8,30 @@ on:
 
 jobs:
 
+  # ---------- CI Reusable ----------
   call-ci:
     uses: ./.github/workflows/ci.yml
     secrets:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
 
+  # ---------- Deploy a Staging ----------
   deploy-staging:
     needs: call-ci
     uses: ./.github/workflows/deploy-staging.yml
     with:
-      gcp_project_id: "dummy"       
+      # Inputs obligatorios del workflow reusable (pueden ser literales o placeholders)
+      gcp_project_id: "staging-project"       
       staging_vm_ip: "dummy"
       staging_vm_user: "dummy"
       staging_vm_key: "dummy"
     secrets:
+      # Secrets reales
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
       STAGING_VM_IP: ${{ secrets.STAGING_VM_IP }}
       STAGING_VM_USER: ${{ secrets.STAGING_VM_USER }}
       STAGING_VM_KEY: ${{ secrets.STAGING_VM_KEY }}
 
+  # ---------- Integration Test + DAST ----------
   integration-dast:
     needs: deploy-staging
     uses: ./.github/workflows/integration-test.yml
@@ -35,17 +40,6 @@ jobs:
     secrets:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
 
-
-#  deploy-production:
-#   if : false   
-#    uses: ./.github/workflows/deploy-production.yml
-#    with:
-#      gcp_project_id: "dummy"
-#      prod_vm_ip: "dummy"
-#      prod_vm_user: "dummy"
-#      prod_vm_key: "dummy"
-#    secrets:
-#      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-#      PROD_VM_IP: ${{ secrets.PROD_VM_IP }}
-#      PROD_VM_USER: ${{ secrets.PROD_VM_USER }}
-#      PROD_VM_KEY: ${{ secrets.PROD_VM_KEY }}
+# ---------- Deploy a Producción (manual) ----------
+# NOTA: no se puede llamar con `uses:` si es workflow_dispatch
+# Para deploy a producción, ejecutá directamente deploy-production.yml desde GitHub Actions

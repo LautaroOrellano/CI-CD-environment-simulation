@@ -3,15 +3,27 @@ name: Deploy Staging
 on:
   workflow_call:
     inputs:
-      gpc_project_id:
+      gcp_project_id:
         required: true
         type: string
       staging_vm_ip:
         required: true
         type: string
-      stagin_vm_key:
+      staging_vm_user:
         required: true
         type: string
+      staging_vm_key:
+        required: true
+        type: string
+    secrets:
+      GCP_PROJECT_ID:
+        required: true
+      STAGING_VM_IP:
+        required: true
+      STAGING_VM_USER:
+        required: true
+      STAGING_VM_KEY:
+        required: true
 
 jobs:
   deploy-staging:
