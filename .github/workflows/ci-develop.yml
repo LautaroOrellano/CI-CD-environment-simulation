@@ -1,0 +1,12 @@
+name: CI Develop
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  call-ci:
+    uses: ./.github/workflows/ci.yml
+    secrets:
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
