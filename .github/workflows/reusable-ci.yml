@@ -7,7 +7,7 @@ on:
         description: "Full image reference pushed to Artifact Registry"
         value: ${{ jobs.ci.outputs.image_ref }}
     secrets:
-      GPC_PROJECT_ID:
+      GCP_PROJECT_ID:
         required: true
 
 jobs:
@@ -20,6 +20,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Print GCP Project ID
+        run: echo "GCP Project ID is ${{ secrets.GCP_PROJECT_ID }}"
 
       - name: Setup Python
         uses: actions/setup-python@v5
