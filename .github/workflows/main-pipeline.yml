@@ -7,24 +7,13 @@ on:
   workflow_dispatch:
 
 jobs:
-
-  call-ci:
+  ci:
     uses: ./.github/workflows/reusable-ci.yml
+    secrets: inherit
 
   deploy-staging:
-    needs: call-ci
+    needs: ci
     uses: ./.github/workflows/deploy-staging.yml
-
-    secrets:
-      gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
-      staging_vm_ip: ${{ secrets.STAGING_VM_IP }}
-      staging_vm_user: ${{ secrets.STAGING_VM_USER }}
-      staging_vm_key: ${{ secrets.STAGING_VM_KEY }}
-      GCR_CREDENTIALS_JSON: ${{ secrets.GCR_CREDENTIALS_JSON }}
-
-  integration-dast:
-    needs: deploy-staging
-    uses: ./.github/workflows/integration-test.yml
-
-    secrets:
-      gcp_project_id: ${{ secrets.GCP_PROJECT_ID }}
+    with:
+      image_ref: ${{ needs.ci.outputs.image_ref }}
+    secrets: inherit

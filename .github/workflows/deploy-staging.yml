@@ -2,6 +2,10 @@ name: Deploy Staging
 
 on:
   workflow_call:
+    inputs:
+      image_ref:
+        required: true
+        type: string
     secrets:
       gcp_project_id:
         required: true
@@ -20,32 +24,24 @@ jobs:
     environment: staging
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
       # Auth en GCP
-      - name: Authenticate GCR
+      - name: Authenticate GCP
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCR_CREDENTIALS_JSON }}
 
       # Configurar docker para GCR
-      - name: Configure Docker for GCR
+      - name: Configure Docker for Artifact Registry
         run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
 
-      - name: Build and push Docker image
-        run: |
-          docker build -t us-central1-docker.pkg.dev/${{ secrets.gcp_project_id }}/demo-api/demo-api:staging .
-          docker push us-central1-docker.pkg.dev/${{ secrets.gcp_project_id }}/demo-api/demo-api:staging
-
-      - name: Deploy to Staging VM via SSH
+      - name: Deploy to Staging VM
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.staging_vm_ip }}
           username: ${{ secrets.staging_vm_user }}
           key: ${{ secrets.staging_vm_key }}
           script: |
-            docker pull us-central1-docker.pkg.dev/${{ secrets.gcp_project_id }}/demo-api/demo-api:staging
+            docker pull ${{ inputs.image_ref }}
             docker stop demo-api || true
             docker rm demo-api || true
-            docker run -d -p 80:80 --name demo-api us-central1-docker.pkg.dev/${{ secrets.gcp_project_id }}/demo-api/demo-api:staging
+            docker run -d -p 80:80 --name demo-api ${{ inputs.image_ref }}

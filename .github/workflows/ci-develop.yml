@@ -7,6 +7,6 @@ on:
 
 jobs:
   call-ci:
-    uses: ./.github/workflows/ci.yml
+    uses: ./.github/workflows/reusable-ci.yml
     secrets:
       GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}

@@ -2,14 +2,27 @@ name: Reusable CI
 
 on:
   workflow_call:
+    outputs:
+      image_ref:
+        description: "Full image reference pushed to Artifact Registry"
+        value: ${{ jobs.ci.outputs.image_ref }}
+    secrets:
+      GCP_PROJECT_ID:
+        required: true
 
 jobs:
   ci:
     runs-on: ubuntu-latest
 
+    outputs:
+      image_ref: ${{ steps.set-image.outputs.image_ref }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Print GCP Project ID
+        run: echo "GCP Project ID is ${{ secrets.GCP_PROJECT_ID }}"
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -38,11 +51,35 @@ jobs:
           pip install bandit
           bandit -r . -x test --severity-level medium 
 
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_CREDENTIALS_JSON }}
+
+      - name: Configure Docker for Artifact Registry
+        run: |
+          gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
       - name: Build Docker image
         run: |
-          docker build -t demo-api .
-
+          docker build \
+            -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-api/demo-api:${{ github.sha }} .
+      
       - name: Scan Docker image
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: demo-api
+          image-ref: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-api/demo-api:${{ github.sha }}
+
+      - name: Push Docker image to Artifact Registry
+        run: |
+          docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-api/demo-api:${{ github.sha }}
+
+      - name: Set image reference
+        id: set-image
+        run: |
+          echo "image_ref=us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/demo-api/demo-api:${{ github.sha }}" >> $GITHUB_OUTPUT
+
+      - name: Debug outputs
+        run: |
+          echo "Image ref is: ${{ steps.set-image.outputs.image_ref }}"
+
